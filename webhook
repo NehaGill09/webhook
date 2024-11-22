@@ -1,0 +1,86 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+
+const app = express();
+app.use(bodyParser.json());
+
+// Webhook Endpoint
+app.post("/webhook", (req, res) => {
+  const intentName = req.body.queryResult.intent.displayName;
+  let response;
+
+  if (intentName === "AskDegree") {
+    response = {
+      fulfillmentMessages: [
+        {
+          text: {
+            text: ["What degree level are you interested in? Undergraduate, Graduate, or PhD?"]
+          }
+        }
+      ]
+    };
+  } else if (intentName === "FieldInterest") {
+    response = {
+      fulfillmentMessages: [
+        {
+          text: {
+            text: ["Great! Click the button below to select your field."]
+          }
+        },
+        {
+          payload: {
+            richContent: [
+              [
+                {
+                  type: "button",
+                  text: "Go to Field Selection Screen",
+                  link: "myapp://navigate?screen=FieldSelectionScreen"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    };
+  } else if (intentName === "SuggestField") {
+    response = {
+      fulfillmentMessages: [
+        {
+          text: {
+            text: ["Here are some trending fields you might be interested in:"]
+          }
+        },
+        {
+          payload: {
+            richContent: [
+              [
+                { type: "chip", text: "Artificial Intelligence" },
+                { type: "chip", text: "Data Science" },
+                { type: "chip", text: "Cybersecurity" },
+                { type: "chip", text: "Renewable Energy" }
+              ]
+            ]
+          }
+        }
+      ]
+    };
+  } else {
+    response = {
+      fulfillmentMessages: [
+        {
+          text: {
+            text: ["I didn't quite get that. Could you try again?"]
+          }
+        }
+      ]
+    };
+  }
+
+  res.send(response);
+});
+
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
